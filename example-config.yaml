@@ -1,0 +1,21 @@
+# git-llm-review configuration file
+
+# File extensions to analyze
+extensions:
+  - .go
+  - .c
+  - .cc
+  - .proto
+  - .vue
+
+# LLM API settings
+llm:
+  provider: openai  # or "anthropic"
+  api_url: https://api.openai.com/v1
+  api_key: your-api-key-here
+  model: gpt-4
+  timeout: 300  # seconds
+
+# Performance settings
+concurrency:
+  max_tasks: 5

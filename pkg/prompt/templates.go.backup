@@ -1,0 +1,152 @@
+package prompt
+
+import (
+	"github.com/niels/git-llm-review/pkg/llm"
+)
+
+// Templates for different providers
+
+// DefaultReviewTemplate is the standard template for code reviews
+const DefaultReviewTemplate = `You are a code review assistant. Please review the following code file and the changes made to it.
+
+FULL FILE CONTENT:
+{{.FileContent}}
+
+DIFF (CHANGES MADE):
+{{.FileDiff}}
+
+Please analyze the changes for:
+1. Potential bugs or logic errors
+2. Code style issues
+3. Performance or efficiency concerns
+
+Provide your response in JSON format with the following structure:
+{
+  "issues": [
+    {
+      "title": "Brief issue title",
+      "explanation": "Detailed explanation of the issue",
+      "diff": "Code diff showing the fix (if applicable)"
+    }
+  ]
+}
+
+{{.AdditionalInstructions}}
+`
+
+// OpenAISystemTemplate is the system template for OpenAI
+const OpenAISystemTemplate = `You are an expert code reviewer. Your task is to review the provided code changes and provide constructive feedback.
+Focus on:
+1. Bugs, errors, and potential issues
+2. Code quality and best practices
+3. Performance considerations
+4. Security vulnerabilities
+5. Readability and maintainability
+
+Be specific, clear, and actionable in your feedback. Provide examples or suggestions for improvement when possible.
+You must respond with valid JSON in the specified format.`
+
+// OpenAIUserTemplate is the user template for OpenAI
+const OpenAIUserTemplate = `You are a code review assistant. Please review the following code changes:
+
+File: {{.FilePath}}
+
+Changes (diff):
+` + "```diff\n{{.FileDiff}}\n```" + `
+
+Full file content:
+` + "```{{.Language}}\n{{.FileContent}}\n```" + `
+
+Please analyze the changes for:
+1. Potential bugs or logic errors
+2. Code style issues
+3. Performance or efficiency concerns
+
+Provide your response in JSON format with the following structure:
+{
+  "issues": [
+    {
+      "title": "Brief issue title",
+      "explanation": "Detailed explanation of the issue",
+      "diff": "Code diff showing the fix (if applicable)"
+    }
+  ]
+}
+
+{{.AdditionalInstructions}}
+`
+
+// AnthropicSystemTemplate is the system template for Anthropic
+const AnthropicSystemTemplate = `You are a code review assistant. Review the following code and provide helpful feedback.
+Focus on potential bugs, performance issues, security concerns, and best practices.
+Be concise and specific in your feedback. Provide clear explanations for your suggestions.
+
+You must respond with valid JSON in the specified format.`
+
+// AnthropicUserTemplate is the user template for Anthropic
+const AnthropicUserTemplate = `Human: I need you to review some code for me.
+
+File: {{.FilePath}}
+
+FULL FILE CONTENT:
+` + "```{{.Language}}\n{{.FileContent}}\n```" + `
+
+DIFF (CHANGES MADE):
+` + "```diff\n{{.FileDiff}}\n```" + `
+
+Please analyze the changes for:
+1. Potential bugs or logic errors
+2. Code style issues
+3. Performance or efficiency concerns
+
+Provide your response in JSON format with the following structure:
+{
+  "issues": [
+    {
+      "title": "Brief issue title",
+      "explanation": "Detailed explanation of the issue",
+      "diff": "Code diff showing the fix (if applicable)"
+    }
+  ]
+}
+
+{{.AdditionalInstructions}}
+`
+
+// TemplateData holds the data for template rendering
+type TemplateData struct {
+	FilePath              string
+	FileContent           string
+	FileDiff              string
+	Language              string
+	AdditionalInstructions string
+	IncludeExplanations   bool
+}
+
+// NewTemplateData creates a new template data struct from a review request
+func NewTemplateData(request *llm.ReviewRequest) *TemplateData {
+	// Extract language from file path
+	language := GetLanguageFromFilePath(request.FilePath)
+	
+	// Build additional instructions
+	additionalInstructions := ""
+	if request.Options.AdditionalInstructions != "" {
+		additionalInstructions += "Additional instructions:\n"
+		additionalInstructions += request.Options.AdditionalInstructions
+		additionalInstructions += "\n\n"
+	}
+	
+	// Add specific request for explanations if needed
+	if request.Options.IncludeExplanations {
+		additionalInstructions += "Please include detailed explanations for your suggestions and the reasoning behind them in the 'explanation' field of each issue."
+	}
+	
+	return &TemplateData{
+		FilePath:              request.FilePath,
+		FileContent:           request.FileContent,
+		FileDiff:              request.FileDiff,
+		Language:              language,
+		AdditionalInstructions: additionalInstructions,
+		IncludeExplanations:   request.Options.IncludeExplanations,
+	}
+}
