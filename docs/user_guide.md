@@ -1,31 +1,31 @@
-# git-llm-review User Guide
+# git-llm-reviewer User Guide
 
 ## Introduction
 
-`git-llm-review` is a tool that uses Large Language Models (LLMs) to automatically review code changes in Git repositories. It helps identify potential issues, bugs, and improvements in your code before you commit it.
+`git-llm-reviewer` is a tool that uses Large Language Models (LLMs) to automatically review code changes in Git repositories. It helps identify potential issues, bugs, and improvements in your code before you commit it.
 
 ## Installation
 
 ### Quick Install
 
 ```bash
-curl -sL https://raw.githubusercontent.com/niels/git-llm-review/main/install.sh | bash
+curl -sL https://raw.githubusercontent.com/mrheinen/git-llm-reviewer/main/install.sh | bash
 ```
 
 ### Manual Install
 
-1. Download the binary for your platform from the [releases page](https://github.com/niels/git-llm-review/releases)
+1. Download the binary for your platform from the [releases page](https://github.com/mrheinen/git-llm-reviewer/releases) (note: no releases published yet)
 2. Extract the archive
 3. Move the binary to a directory in your PATH (e.g., `/usr/local/bin`)
 4. Make it executable
 
 ## Configuration
 
-`git-llm-review` looks for a configuration file in the following locations (in order):
+`git-llm-reviewer` looks for a configuration file in the following locations (in order):
 
 1. Path specified by the `--config` flag
-2. `.git-llm-review.yaml` in the current directory
-3. `.git-llm-review.yaml` in your home directory
+2. `.git-llm-reviewer.yaml` in the current directory
+3. `.git-llm-reviewer.yaml` in your home directory
 
 Here's a sample configuration file:
 
@@ -66,11 +66,11 @@ concurrency:
 
 ### Review Staged Changes
 
-By default, `git-llm-review` analyzes files that have been staged in git:
+By default, `git-llm-reviewer` analyzes files that have been staged in git:
 
 ```bash
 git add file.go
-git-llm-review
+git-llm-reviewer
 ```
 
 ### Review All Changes
@@ -78,7 +78,7 @@ git-llm-review
 To review all changed files (both staged and unstaged):
 
 ```bash
-git-llm-review --all
+git-llm-reviewer --all
 ```
 
 ### Generate a Markdown Report
@@ -86,7 +86,7 @@ git-llm-review --all
 To save the review results to a directory containing individual markdown files for each reviewed file, along with a summary report:
 
 ```bash
-git-llm-review --output-dir reports
+git-llm-reviewer --output-dir reports
 ```
 
 This will create a directory called `reports` and generate individual markdown files for each reviewed file, along with a summary report.
@@ -96,27 +96,27 @@ This will create a directory called `reports` and generate individual markdown f
 ### Override LLM Provider
 
 ```bash
-git-llm-review --provider anthropic
+git-llm-reviewer --provider anthropic
 ```
 
 ### Enable Debug Mode
 
 ```bash
-git-llm-review --debug
+git-llm-reviewer --debug
 ```
 
 ### Verbose Output
 
 ```bash
-git-llm-review --verbose
+git-llm-reviewer --verbose
 ```
 
 ### Debug Prompt Generation
 
-If you need to debug how git-llm-review is generating prompts for the LLM, you can use the `--log-prompts` flag:
+If you need to debug how git-llm-reviewer is generating prompts for the LLM, you can use the `--log-prompts` flag:
 
 ```bash
-git-llm-review --log-prompts
+git-llm-reviewer --log-prompts
 ```
 
 This will save all prompts sent to the LLM provider to a file called `prompt.log`. Each prompt entry includes:
@@ -135,7 +135,7 @@ This is especially useful for:
 
 ### Pre-commit Hook
 
-You can set up `git-llm-review` as a pre-commit hook to automatically review your code before committing:
+You can set up `git-llm-reviewer` as a pre-commit hook to automatically review your code before committing:
 
 1. Create `.git/hooks/pre-commit` in your repository:
 
@@ -143,8 +143,8 @@ You can set up `git-llm-review` as a pre-commit hook to automatically review you
 #!/bin/bash
 set -e
 
-# Run git-llm-review
-git-llm-review
+# Run git-llm-reviewer
+git-llm-reviewer
 
 # Ask for confirmation if issues were found
 read -p "Proceed with commit? (y/n) " -n 1 -r
@@ -162,7 +162,7 @@ chmod +x .git/hooks/pre-commit
 
 ### CI Integration
 
-Add `git-llm-review` to your CI pipeline to automatically review changes in pull requests.
+Add `git-llm-reviewer` to your CI pipeline to automatically review changes in pull requests.
 
 Example GitHub Actions workflow:
 
@@ -181,13 +181,13 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Install git-llm-review
+      - name: Install git-llm-reviewer
         run: |
-          curl -sL https://raw.githubusercontent.com/niels/git-llm-review/main/install.sh | bash
+          curl -sL https://raw.githubusercontent.com/mrheinen/git-llm-reviewer/main/install.sh | bash
       
       - name: Run code review
         run: |
-          git-llm-review --all --output-dir review
+          git-llm-reviewer --all --output-dir review
         env:
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
       
@@ -209,11 +209,11 @@ Make sure you have the API key correctly set in your configuration file, or set 
 
 ### Git Repository Not Found
 
-`git-llm-review` must be run from within a Git repository. Make sure you're in a Git repository directory.
+`git-llm-reviewer` must be run from within a Git repository. Make sure you're in a Git repository directory.
 
 ### No Files to Review
 
-If `git-llm-review` reports "No files to review", make sure:
+If `git-llm-reviewer` reports "No files to review", make sure:
 
 1. You have modified files in your repository
 2. The files match the extensions defined in your configuration
@@ -221,4 +221,4 @@ If `git-llm-review` reports "No files to review", make sure:
 
 ## Support
 
-For issues and feature requests, please file an issue on the [GitHub repository](https://github.com/niels/git-llm-review/issues).
+For issues and feature requests, please file an issue on the [GitHub repository](https://github.com/mrheinen/git-llm-reviewer/issues).

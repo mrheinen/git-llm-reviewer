@@ -1,10 +1,10 @@
-# git-llm-review
+# git-llm-reviewer
 
 A tool that uses LLMs to review code changes in Git repositories.
 
 ## Overview
 
-`git-llm-review` is a command-line tool that leverages Large Language Models (LLMs) to automatically review code changes in Git repositories. It helps developers identify potential issues, suggest improvements, and ensure code quality.
+`git-llm-reviewer` is a command-line tool that leverages Large Language Models (LLMs) to automatically review code changes in Git repositories. It helps developers identify potential issues, suggest improvements, and ensure code quality.
 
 ## Features
 
@@ -16,29 +16,37 @@ A tool that uses LLMs to review code changes in Git repositories.
 
 ## Installation
 
-### Option 1: Using the installation script
+### Building from Source
+
+#### Prerequisites
+
+- Go 1.20 or later
+- Git
+- Make (for using the Makefile)
+
+#### Steps
 
 ```bash
-# Download and run the installation script
-curl -sL https://raw.githubusercontent.com/niels/git-llm-review/main/install.sh | bash
+# Clone the repository
+git clone https://github.com/mrheinen/git-llm-reviewer.git
+cd git-llm-reviewer
+
+# Build for your current platform
+make build
+
+# Install locally (moves binary to /usr/local/bin)
+make install
 ```
 
-### Option 2: Pre-built binaries
-
-1. Download the latest release for your platform from the [Releases](https://github.com/niels/git-llm-review/releases) page.
-2. Extract the archive: `unzip git-llm-review-*.zip`
-3. Move the binary to a directory in your PATH: `mv git-llm-review-*/git-llm-review /usr/local/bin/`
-4. Make it executable: `chmod +x /usr/local/bin/git-llm-review`
-
-### Option 3: Using Go
+After installation, verify that it's working:
 
 ```bash
-go install github.com/niels/git-llm-review/cmd/git-llm-review@latest
+git-llm-reviewer --version
 ```
 
 ## Configuration
 
-Create a configuration file at `.git-llm-review.yaml` in your home directory or project root:
+Create a configuration file at `.git-llm-reviewer.yaml` in your home directory or project root:
 
 ```yaml
 extensions:
@@ -59,32 +67,32 @@ concurrency:
 
 ```bash
 # Review staged changes
-git-llm-review
+git-llm-reviewer
 
 # Review all changes (both staged and unstaged)
-git-llm-review --all
+git-llm-reviewer --all
 
 # Generate a markdown report
-git-llm-review --output-dir reports
+git-llm-reviewer --output-dir reports
 
 # Use verbose output
-git-llm-review --verbose
+git-llm-reviewer --verbose
 
 # Override LLM provider
-git-llm-review --provider anthropic
+git-llm-reviewer --provider anthropic
 
 # Show version information
-git-llm-review --version
+git-llm-reviewer --version
 
 # Log prompts for debugging
-git-llm-review --log-prompts
+git-llm-reviewer --log-prompts
 ```
 
 ### Flags
 
 - `-v, --version`: Display version information
 - `-h, --help`: Show help information
-- `-c, --config string`: Specify configuration file path (default: ".git-llm-review.yaml")
+- `-c, --config string`: Specify configuration file path (default: ".git-llm-reviewer.yaml")
 - `-o, --output-dir string`: Directory to write review reports
 - `-d, --debug`: Enable debug mode
 - `-a, --all`: Review all changed files (both staged and unstaged)
@@ -104,8 +112,8 @@ git-llm-review --log-prompts
 
 ```bash
 # Clone the repository
-git clone https://github.com/niels/git-llm-review.git
-cd git-llm-review
+git clone https://github.com/mrheinen/git-llm-reviewer.git
+cd git-llm-reviewer
 
 # Build for your current platform
 make build
@@ -136,7 +144,7 @@ make build-windows-amd64
 
 ## Versioning
 
-`git-llm-review` uses semantic versioning and Git tags for versioning. The build process automatically embeds version information from Git tags into the binary.
+`git-llm-reviewer` uses semantic versioning and Git tags for versioning. The build process automatically embeds version information from Git tags into the binary.
 
 ## Development
 
@@ -144,7 +152,7 @@ make build-windows-amd64
 
 ```
 .
-├── cmd/git-llm-review/    # Main application entry point
+├── cmd/git-llm-reviewer/   # Main application entry point
 ├── internal/              # Internal packages
 ├── pkg/                   # Public packages
 │   ├── config/            # Configuration handling

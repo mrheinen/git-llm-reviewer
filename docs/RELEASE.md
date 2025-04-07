@@ -1,6 +1,6 @@
-# Release Process for git-llm-review
+# Release Process for git-llm-reviewer
 
-This document outlines the process for creating and publishing a new release of the git-llm-review tool.
+This document outlines the process for creating and publishing a new release of the git-llm-reviewer tool.
 
 ## Prerequisites
 
@@ -97,7 +97,7 @@ The packaged artifacts will be available in the `package/` directory.
 Verify that the release artifacts work correctly:
 
 1. Extract each ZIP package
-2. Test the binary by running `git-llm-review --version`
+2. Test the binary by running `git-llm-reviewer --version`
 3. Verify that the version information is correct
 4. Run a basic workflow test on each platform (if possible)
 
@@ -173,4 +173,4 @@ To maintain a clean Git history and make releases predictable:
 
 ---
 
-This release process helps ensure consistent, high-quality releases of the git-llm-review tool.
+This release process helps ensure consistent, high-quality releases of the git-llm-reviewer tool.
