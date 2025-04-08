@@ -152,11 +152,27 @@ This will save all prompts sent to the LLM provider to a file called `prompt.log
 - File path being reviewed
 - Full prompt content
 
-This is especially useful for:
+### Debug Full Exchange
+
+For more comprehensive debugging, you can use the `--log-full-exchange` flag to log both prompts and raw LLM responses:
+
+```bash
+git-llm-reviewer --log-full-exchange
+```
+
+This will save the complete exchange (both prompts and raw responses) to a file called `exchange.log`. Each entry includes:
+- Timestamp
+- LLM provider name
+- File path being reviewed
+- Full prompt content
+- Complete raw response from the LLM
+
+These logging options are especially useful for:
 - Debugging issues with LLM reviews
-- Understanding what information is being sent to the LLM
+- Understanding what information is being sent to and received from the LLM
 - Manually fine-tuning prompts
 - Copying prompts to test directly with LLM providers
+- Analyzing raw LLM responses to improve parsing
 
 ## Workflow Integration
 

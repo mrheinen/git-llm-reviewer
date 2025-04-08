@@ -203,17 +203,17 @@ func (f *TerminalFormatter) HighlightDiff(diff string, filePath string) {
 func (f *TerminalFormatter) formatIssueType(title string) string {
 	// Check if the title contains a prefix like "Security:", "Performance:", etc.
 	possibleTypes := map[string]string{
-		"bug":           ColorBoldRed,
-		"security":      ColorBoldRed,
-		"perf":          ColorBoldYellow,
-		"performance":   ColorBoldYellow,
-		"style":         ColorBoldCyan,
-		"unused":        ColorBoldCyan,
-		"doc":           ColorBoldGreen,
-		"documentation": ColorBoldGreen,
-		"maintain":      ColorBoldBlue,
-		"maintenance":   ColorBoldBlue,
-		"refactor":      ColorBoldMagenta,
+		IssueTypeBug:           ColorBoldRed,
+		IssueTypeSecurity:      ColorBoldRed,
+		IssueTypePerf:          ColorBoldYellow,
+		IssueTypePerformance:   ColorBoldYellow,
+		IssueTypeStyle:         ColorBoldCyan,
+		IssueTypeUnused:        ColorBoldCyan,
+		IssueTypeDoc:           ColorBoldGreen,
+		IssueTypeDocumentation: ColorBoldGreen,
+		IssueTypeMaintain:      ColorBoldBlue,
+		IssueTypeMaintenance:   ColorBoldBlue,
+		IssueTypeRefactor:      ColorBoldMagenta,
 	}
 
 	titleLower := strings.ToLower(title)

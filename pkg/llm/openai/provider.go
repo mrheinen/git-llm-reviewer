@@ -13,6 +13,7 @@ import (
 	"github.com/niels/git-llm-review/pkg/config"
 	"github.com/niels/git-llm-review/pkg/extractor"
 	"github.com/niels/git-llm-review/pkg/llm"
+	"github.com/niels/git-llm-review/pkg/llm/exchangelog"
 	"github.com/niels/git-llm-review/pkg/llm/promptlog"
 	"github.com/niels/git-llm-review/pkg/logging"
 	"github.com/niels/git-llm-review/pkg/prompt"
@@ -260,6 +261,14 @@ func (p *Provider) GetCompletion(prompt string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 360*time.Second)
 	defer cancel()
 
+	// Log the prompt if prompt logging is enabled
+	if err := promptlog.LogPrompt(p.Name(), "prompt", prompt); err != nil {
+		logging.WarnWith("Failed to log prompt", map[string]interface{}{
+			"error": err.Error(),
+		})
+		// Continue without prompt logging, but log the error
+	}
+
 	// Create chat completion params
 	params := openai.ChatCompletionNewParams{
 		Messages: []openai.ChatCompletionMessageParamUnion{
@@ -284,10 +293,18 @@ func (p *Provider) GetCompletion(prompt string) (string, error) {
 
 	// Extract content
 	content := completion.Choices[0].Message.Content
-	
+
 	// Remove <think>...</think> tags if present
 	content = util.RemoveThinkTags(content)
-	
+
+	// Log the full exchange if exchange logging is enabled
+	if err := exchangelog.LogExchange(p.Name(), "prompt", prompt, content); err != nil {
+		logging.WarnWith("Failed to log exchange", map[string]interface{}{
+			"error": err.Error(),
+		})
+		// Continue without exchange logging, but log the error
+	}
+
 	// Return the processed content
 	return content, nil
 }

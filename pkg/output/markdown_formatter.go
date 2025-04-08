@@ -120,16 +120,16 @@ func (f *MarkdownFormatter) extractIssueType(title string) string {
 	
 	// Common issue types
 	switch strings.ToLower(issueType) {
-	case "bug":
-		return "Bug"
-	case "style", "formatting":
-		return "Style"
-	case "performance", "efficiency":
-		return "Performance"
-	case "security":
-		return "Security"
-	case "maintainability", "readability":
-		return "Maintainability"
+	case IssueTypeBug:
+		return IssueTypeBugDisplay
+	case IssueTypeStyle, "formatting":
+		return IssueTypeStyleDisplay
+	case IssueTypePerformance, IssueTypePerf, "efficiency":
+		return IssueTypePerformanceDisplay
+	case IssueTypeSecurity:
+		return IssueTypeSecurityDisplay
+	case IssueTypeMaintainability, IssueTypeMaintenance, IssueTypeMaintain, "readability":
+		return IssueTypeMaintainabilityDisplay
 	default:
 		// If it's capitalized, it's probably a valid type
 		if len(issueType) > 0 && issueType[0] >= 'A' && issueType[0] <= 'Z' {
