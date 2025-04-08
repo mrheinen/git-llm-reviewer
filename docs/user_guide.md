@@ -6,18 +6,45 @@
 
 ## Installation
 
-### Quick Install
+### Building from Source
+
+#### Prerequisites
+
+- Go 1.20 or later
+- Git
+- Make (for using the Makefile)
+
+#### Steps
 
 ```bash
-curl -sL https://raw.githubusercontent.com/mrheinen/git-llm-reviewer/main/install.sh | bash
+# Clone the repository
+git clone https://github.com/mrheinen/git-llm-reviewer.git
+cd git-llm-reviewer
+
+# Build for your current platform
+make build
+
+# Install locally (moves binary to /usr/local/bin)
+make install
 ```
 
-### Manual Install
+After installation, verify that it's working:
 
-1. Download the binary for your platform from the [releases page](https://github.com/mrheinen/git-llm-reviewer/releases) (note: no releases published yet)
-2. Extract the archive
-3. Move the binary to a directory in your PATH (e.g., `/usr/local/bin`)
-4. Make it executable
+```bash
+git-llm-reviewer --version
+```
+
+#### Optional: Build for Different Platforms
+
+```bash
+# Build for specific platforms
+make build-linux-amd64
+make build-darwin-arm64
+make build-windows-amd64
+
+# Build for all supported platforms
+make build-all
+```
 
 ## Configuration
 
@@ -49,7 +76,7 @@ llm:
   provider: openai
   # API URL (optional, defaults to the provider's standard API URL)
   apiURL: https://api.openai.com/v1
-  # API key (required)
+  # API key (required, can be overridden by LLM_API_KEY environment variable)
   apiKey: your-api-key-here
   # Model to use
   model: gpt-4
@@ -181,15 +208,21 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Install git-llm-reviewer
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+      
+      - name: Build git-llm-reviewer from source
         run: |
-          curl -sL https://raw.githubusercontent.com/mrheinen/git-llm-reviewer/main/install.sh | bash
+          make build
+          sudo make install
       
       - name: Run code review
         run: |
           git-llm-reviewer --all --output-dir review
         env:
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }} # This overrides any API key in the config file
       
       - name: Upload review
         uses: actions/upload-artifact@v3
@@ -202,10 +235,9 @@ jobs:
 
 ### API Key Not Found
 
-Make sure you have the API key correctly set in your configuration file, or set the appropriate environment variable:
+Make sure you have the API key correctly set in your configuration file, or set the `LLM_API_KEY` environment variable.
 
-- For OpenAI: `OPENAI_API_KEY`
-- For Anthropic: `ANTHROPIC_API_KEY`
+Using the `LLM_API_KEY` environment variable will override any API key set in the configuration file, regardless of the provider you're using.
 
 ### Git Repository Not Found
 

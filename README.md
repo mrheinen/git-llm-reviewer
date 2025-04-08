@@ -13,6 +13,7 @@ A tool that uses LLMs to review code changes in Git repositories.
 - Provides detailed feedback on code quality, bugs, and improvements
 - Generates markdown reports for easy sharing and reference
 - Concurrent processing for faster reviews of multiple files
+- Support local (ollama, llama.cpp, etc) and hosted LLMs (OpenAI, Anthropic)
 
 ## Installation
 
@@ -62,6 +63,8 @@ llm:
 concurrency:
   maxTasks: 4
 ```
+
+To use a local LLM you should chose the openai provider and point it to your local openai compatible API server.
 
 ## Usage
 
