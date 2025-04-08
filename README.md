@@ -64,7 +64,7 @@ concurrency:
   maxTasks: 4
 ```
 
-To use a local LLM you should chose the openai provider and point it to your local openai compatible API server.
+To use a local LLM you should choose the openai provider and point it to your local openai compatible API server.
 
 ## Usage
 
