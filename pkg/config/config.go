@@ -138,6 +138,11 @@ func Load(configPath string) (*Config, error) {
 	if fileCfg.LLM.Timeout > 0 {
 		cfg.LLM.Timeout = fileCfg.LLM.Timeout
 	}
+	
+	// Check for LLM_API_KEY environment variable to override the API key
+	if envKey := os.Getenv("LLM_API_KEY"); envKey != "" {
+		cfg.LLM.APIKey = envKey
+	}
 
 	// Merge concurrency configuration
 	if fileCfg.Concurrency.MaxTasks > 0 {
@@ -201,7 +206,12 @@ func LoadOrDefault(configPath string) *Config {
 		// Log the error but continue with defaults
 		fmt.Fprintf(os.Stderr, "Warning: Failed to load config from %s: %v\n", configPath, err)
 		fmt.Fprintf(os.Stderr, "Using default configuration\n")
-		return LoadDefault()
+		cfg = LoadDefault()
+		
+		// Even with default config, check for LLM_API_KEY environment variable
+		if envKey := os.Getenv("LLM_API_KEY"); envKey != "" {
+			cfg.LLM.APIKey = envKey
+		}
 	}
 	return cfg
 }
