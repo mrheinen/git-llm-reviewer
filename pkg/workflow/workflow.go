@@ -47,12 +47,12 @@ type Statistics struct {
 
 // ReviewWorkflow represents the main workflow for the git-llm-review tool
 type ReviewWorkflow struct {
-	options        Options
-	config         *config.Config
-	repoDetector   git.RepositoryDetector
-	provider       llm.Provider
-	terminalOutput *output.TerminalFormatter
-	markdownOutput *output.MarkdownFormatter
+	options         Options
+	config          *config.Config
+	repoDetector    git.RepositoryDetector
+	provider        llm.Provider
+	terminalOutput  *output.TerminalFormatter
+	markdownOutput  *output.MarkdownFormatter
 	progressTracker progress.Tracker
 	diffHighlights  []diffHighlight
 	pendingDiffs    []pendingDiff
@@ -97,7 +97,7 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 		logging.InfoWith("Prompt logging enabled", map[string]interface{}{
 			"path": promptLogPath,
 		})
-		
+
 		if err := promptlog.InitGlobalLogger(true, promptLogPath); err != nil {
 			logging.ErrorWith("Failed to initialize prompt logger", map[string]interface{}{
 				"error": err.Error(),
@@ -108,7 +108,7 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 	} else {
 		logging.Debug("Prompt logging is disabled")
 	}
-	
+
 	// Initialize exchange logger if requested
 	if options.LogFullExchange {
 		logging.Info("Initializing exchange logger")
@@ -116,7 +116,7 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 		logging.InfoWith("Exchange logging enabled", map[string]interface{}{
 			"path": exchangeLogPath,
 		})
-		
+
 		if err := exchangelog.InitGlobalLogger(true, exchangeLogPath); err != nil {
 			logging.ErrorWith("Failed to initialize exchange logger", map[string]interface{}{
 				"error": err.Error(),
@@ -130,13 +130,13 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 
 	// Initialize LLM provider
 	var provider llm.Provider
-	
+
 	providerName := options.ProviderName
 	if providerName == "" {
 		// If provider name is not specified, use the one from config
 		providerName = cfg.LLM.Provider
 	}
-	
+
 	switch strings.ToLower(providerName) {
 	case "openai":
 		provider, err = openai.NewProvider(cfg)
@@ -155,17 +155,17 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 	// Initialize output formatters
 	terminalOutput := output.NewTerminalFormatter(true) // Always use color in the workflow
 	markdownOutput := output.NewMarkdownFormatter()
-	
+
 	// Initialize progress tracker
 	progressTracker := progress.NewConsoleTracker()
 
 	return &ReviewWorkflow{
-		options:        options,
-		config:         cfg,
-		repoDetector:   repoDetector,
-		provider:       provider,
-		terminalOutput: terminalOutput,
-		markdownOutput: markdownOutput,
+		options:         options,
+		config:          cfg,
+		repoDetector:    repoDetector,
+		provider:        provider,
+		terminalOutput:  terminalOutput,
+		markdownOutput:  markdownOutput,
 		progressTracker: progressTracker,
 		diffHighlights:  make([]diffHighlight, 0),
 		pendingDiffs:    make([]pendingDiff, 0),
@@ -175,7 +175,7 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 // Run executes the review workflow
 func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	startTime := time.Now()
-	
+
 	stats := &Statistics{
 		IssuesByType: make(map[string]int),
 		IssuesByFile: make(map[string]int),
@@ -235,7 +235,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	logging.InfoWith("Found files to review", map[string]interface{}{
 		"count": len(files),
 	})
-	
+
 	// Display files to be reviewed
 	fmt.Printf("Found %d files to review:\n", len(files))
 	for _, file := range files {
@@ -249,7 +249,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	// Step 4: Create file processor
 	fileProcessor := processor.ReviewFileProcessor(
 		repoRoot,
-		w.repoDetector, 
+		w.repoDetector,
 		w.provider,
 		w.provider.Name(),
 	)
@@ -267,14 +267,14 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	// Create a timeout context based on the configuration
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Duration(w.config.LLM.Timeout)*time.Second)
 	defer cancel()
-	
+
 	results, errors := concurrentProcessor.ProcessFiles(timeoutCtx, files)
 
 	// Step 7: Collect statistics and display results
 	stats.FilesProcessed = len(results)
 	stats.FilesWithErrors = len(errors)
 	stats.Duration = time.Since(startTime)
-	
+
 	// Display errors
 	if len(errors) > 0 {
 		logging.Info("Errors encountered during processing:")
@@ -293,32 +293,32 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 		issueCount := result.GetIssueCount()
 		stats.TotalIssues += issueCount
 		stats.IssuesByFile[filePath] = issueCount
-		
+
 		for _, issue := range result.Issues {
 			issueType := extractIssueType(issue.Title)
 			stats.IssuesByType[issueType]++
 		}
-		
+
 		fmt.Printf("\n=== Review for %s (%d issues) ===\n", filePath, issueCount)
 		formattedReview := w.terminalOutput.FormatReview(result)
-		
+
 		// Process the formatted review to handle the diff placeholders
-		
+
 		// Process the output line by line
 		lines := strings.Split(formattedReview, "\n")
 		var processedOutput strings.Builder
-		
+
 		lineIdx := 0
 		for lineIdx < len(lines) {
 			line := lines[lineIdx]
-			
+
 			// Check for diff markers
 			if strings.Contains(line, "<<HIGHLIGHTED_DIFF:") {
 				// Log the diff marker found
 				logging.DebugWith("Found diff marker", map[string]interface{}{
 					"marker": line,
 				})
-				
+
 				// Extract file path from the marker
 				// The marker format is: <<HIGHLIGHTED_DIFF:filepath>>
 				parts := strings.Split(line, ":")
@@ -327,7 +327,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 					logging.DebugWith("Extracted file path from marker", map[string]interface{}{
 						"filePath": filePath,
 					})
-					
+
 					// Find the corresponding diff
 					var diffContent string
 					logging.DebugWith("Looking for diff", map[string]interface{}{
@@ -335,8 +335,8 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 					})
 					for i, diff := range result.Diffs {
 						logging.DebugWith("Comparing diff", map[string]interface{}{
-							"index": i,
-							"diffFile": diff.File,
+							"index":      i,
+							"diffFile":   diff.File,
 							"targetFile": filePath,
 						})
 						if diff.File == filePath {
@@ -347,14 +347,14 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 							break
 						}
 					}
-					
+
 					// Output a separator and the file path
 					fmt.Fprintf(&processedOutput, "\n--- Diff for %s ---\n", filePath)
-					
+
 					// Print the formatted text up to this point
 					fmt.Print(processedOutput.String())
 					processedOutput.Reset()
-					
+
 					// Directly highlight the diff to terminal
 					if diffContent != "" {
 						logging.DebugWith("Highlighting diff", map[string]interface{}{
@@ -367,7 +367,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 						})
 						fmt.Println("[No diff content available]")
 					}
-					
+
 					// Skip the next line if it's empty (usually follows the marker)
 					if lineIdx+1 < len(lines) && lines[lineIdx+1] == "" {
 						lineIdx++
@@ -380,17 +380,17 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 					if issue.Diff != "" {
 						// Output a separator
 						fmt.Fprintf(&processedOutput, "\n--- Legacy diff for issue %d ---\n", i+1)
-						
+
 						// Print the formatted text up to this point
 						fmt.Print(processedOutput.String())
 						processedOutput.Reset()
-						
+
 						// Directly highlight the diff
 						w.terminalOutput.HighlightDiff(issue.Diff, issue.File)
 						break
 					}
 				}
-				
+
 				// Skip the next line if it's empty
 				if lineIdx+1 < len(lines) && lines[lineIdx+1] == "" {
 					lineIdx++
@@ -400,10 +400,10 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 				processedOutput.WriteString(line)
 				processedOutput.WriteString("\n")
 			}
-			
+
 			lineIdx++
 		}
-		
+
 		// Print any remaining output
 		if processedOutput.Len() > 0 {
 			fmt.Print(processedOutput.String())
@@ -413,7 +413,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	// Generate markdown report if requested
 	if w.options.OutputPath != "" {
 		outputDir := w.options.OutputPath
-		
+
 		logging.InfoWith("Generating markdown reports", map[string]interface{}{
 			"output_dir": outputDir,
 		})
@@ -429,7 +429,7 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 			// Create a safe filename from the file path
 			safePath := strings.ReplaceAll(filePath, "/", "_")
 			reportPath := filepath.Join(outputDir, fmt.Sprintf("review_%s.md", safePath))
-			
+
 			if err := w.markdownOutput.WriteToFile(result, filePath, repoName, reportPath); err != nil {
 				return stats, fmt.Errorf("failed to write markdown report for %s: %w", filePath, err)
 			}
@@ -457,21 +457,21 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 	fmt.Printf("Files processed: %d\n", stats.FilesProcessed)
 	fmt.Printf("Files with errors: %d\n", stats.FilesWithErrors)
 	fmt.Printf("Total issues found: %d\n", stats.TotalIssues)
-	
+
 	if len(stats.IssuesByType) > 0 {
 		fmt.Println("Issues by type:")
 		for issueType, count := range stats.IssuesByType {
 			fmt.Printf("  %s: %d\n", issueType, count)
 		}
 	}
-	
+
 	if len(stats.IssuesByFile) > 0 {
 		fmt.Println("Issues by file:")
 		for filePath, count := range stats.IssuesByFile {
 			fmt.Printf("  %s: %d\n", filePath, count)
 		}
 	}
-	
+
 	fmt.Printf("Time taken: %s\n", stats.Duration.Round(time.Second))
 
 	return stats, nil
@@ -481,20 +481,20 @@ func (w *ReviewWorkflow) Run(ctx context.Context) (*Statistics, error) {
 func extractIssueType(title string) string {
 	// Common issue types
 	issueTypes := []string{
-		"Bug", "Error", "Security", "Performance", 
-		"Style", "Documentation", "Optimization", 
+		"Bug", "Error", "Security", "Performance",
+		"Style", "Documentation", "Optimization",
 		"Refactoring", "Testing", "Maintainability",
 	}
-	
+
 	// Check if the title starts with any of the issue types
 	for _, issueType := range issueTypes {
-		if strings.HasPrefix(title, issueType+":") || 
-		   strings.HasPrefix(title, "["+issueType+"]") ||
-		   strings.HasPrefix(title, issueType+" -") {
+		if strings.HasPrefix(title, issueType+":") ||
+			strings.HasPrefix(title, "["+issueType+"]") ||
+			strings.HasPrefix(title, issueType+" -") {
 			return issueType
 		}
 	}
-	
+
 	// Default to "General" if no specific type is found
 	return "General"
 }
@@ -513,14 +513,14 @@ func (w *ReviewWorkflow) writeSummaryReport(filePath string, results map[string]
 	// Write header
 	fmt.Fprintf(writer, "# Code Review Summary for %s\n\n", repoName)
 	fmt.Fprintf(writer, "Generated on: %s\n\n", time.Now().Format(time.RFC1123))
-	
+
 	// Write statistics
 	fmt.Fprintf(writer, "## Statistics\n\n")
 	fmt.Fprintf(writer, "- Files processed: %d\n", stats.FilesProcessed)
 	fmt.Fprintf(writer, "- Files with errors: %d\n", stats.FilesWithErrors)
 	fmt.Fprintf(writer, "- Total issues found: %d\n", stats.TotalIssues)
 	fmt.Fprintf(writer, "- Time taken: %s\n\n", stats.Duration.Round(time.Second))
-	
+
 	// Write issues by type
 	if len(stats.IssuesByType) > 0 {
 		fmt.Fprintf(writer, "### Issues by Type\n\n")
@@ -529,7 +529,7 @@ func (w *ReviewWorkflow) writeSummaryReport(filePath string, results map[string]
 		}
 		fmt.Fprintf(writer, "\n")
 	}
-	
+
 	// Write issues by file
 	if len(stats.IssuesByFile) > 0 {
 		fmt.Fprintf(writer, "### Issues by File\n\n")
@@ -538,23 +538,23 @@ func (w *ReviewWorkflow) writeSummaryReport(filePath string, results map[string]
 		}
 		fmt.Fprintf(writer, "\n")
 	}
-	
+
 	// Write file summaries
 	fmt.Fprintf(writer, "## File Summaries\n\n")
 	for filePath, result := range results {
 		fmt.Fprintf(writer, "### [%s](%s)\n\n", filePath, strings.ReplaceAll(filePath, "/", "_")+".md")
-		
+
 		if len(result.Issues) == 0 {
 			fmt.Fprintf(writer, "No issues found\n\n")
 			continue
 		}
-		
+
 		fmt.Fprintf(writer, "Found %d issues:\n\n", len(result.Issues))
 		for _, issue := range result.Issues {
 			fmt.Fprintf(writer, "1. **%s**  \n", issue.Title)
 			fmt.Fprintf(writer, "   %s\n\n", issue.Explanation)
 		}
 	}
-	
+
 	return nil
 }

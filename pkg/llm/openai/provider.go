@@ -91,7 +91,7 @@ func (p *Provider) ReviewCode(ctx context.Context, request *llm.ReviewRequest) (
 
 	// Create the messages for the chat completion
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You are a code review assistant. Please review the code and provide helpful feedback on bugs, code style, and performance issues.\n\nIMPORTANT: You MUST format your ENTIRE response as a valid JSON object with the following structure:\n{\n  \"issues\": [\n    {\n      \"title\": \"Issue title\",\n      \"explanation\": \"Detailed explanation\",\n      \"file\": \"path/to/file.ext\"\n    }\n  ],\n  \"diffs\": [\n    {\n      \"file\": \"path/to/file.ext\",\n      \"diff\": \"```diff\n@@ line numbers @@\n code changes\n```\"\n    }\n  ]\n}\n\nDo NOT include any text before or after the JSON. Your entire response must be ONLY valid JSON.\n\nYou have access to the FindDefinitionForType function to get more context about types you see in the code. When you encounter a type that you need more information about, use this function to look up its definition. This will help you provide more accurate and insightful reviews."),
+		openai.SystemMessage(prompt.GetSystemPrompt(prompt.ProviderOpenAI, prompt.SystemPromptReview)),
 		openai.UserMessage(userPrompt),
 	}
 
@@ -258,7 +258,7 @@ func (p *Provider) ReviewCode(ctx context.Context, request *llm.ReviewRequest) (
 // GetCompletion sends a prompt to the OpenAI API and returns the completion
 func (p *Provider) GetCompletion(prompt string) (string, error) {
 	// Create context
-	ctx, cancel := context.WithTimeout(context.Background(), 360*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 600*time.Second)
 	defer cancel()
 
 	// Log the prompt if prompt logging is enabled

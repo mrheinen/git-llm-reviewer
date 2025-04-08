@@ -96,8 +96,8 @@ func (p *Provider) ReviewCode(ctx context.Context, request *llm.ReviewRequest) (
 	}
 
 	// Create the messages for the API request
-	// Create system message
-	systemMessage := "You are a code review assistant. Please review the code and provide helpful feedback on bugs, code style, and performance issues. \n\nYou have access to the FindDefinitionForType function to get more context about types you see in the code. When you encounter a type that you need more information about, use this function to look up its definition. This will help you provide more accurate and insightful reviews."
+	// Get system message from centralized system prompts
+	systemMessage := prompt.GetSystemPrompt(prompt.ProviderAnthropic, prompt.SystemPromptReview)
 	
 	// Create user message with prompt
 	userPrompt := prompt.CreatePrompt(request, prompt.ProviderAnthropic)
