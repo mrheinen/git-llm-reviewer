@@ -14,16 +14,17 @@ import (
 )
 
 var (
-	configPath   string
-	outputDir    string
-	debug        bool
-	all          bool
-	showVersion  bool
-	providerName string
-	verbose      bool
-	logPrompts   bool
-	cfg          *config.Config
-	repoDetector git.RepositoryDetector
+	configPath      string
+	outputDir       string
+	debug           bool
+	all             bool
+	showVersion     bool
+	providerName    string
+	verbose         bool
+	logPrompts      bool
+	logFullExchange bool
+	cfg             *config.Config
+	repoDetector    git.RepositoryDetector
 )
 
 // NewRootCmd creates the root command for git-llm-review
@@ -86,13 +87,14 @@ A tool that uses LLMs to review code changes in Git repositories.
 			
 			// Create workflow options
 			options := workflow.Options{
-				ConfigPath:    configPath,
-				All:           all,
-				OutputFormat:  "terminal",
-				OutputPath:    outputDir,
-				ProviderName:  providerName,
-				VerboseOutput: verbose,
-				LogPrompts:    logPrompts,
+				ConfigPath:      configPath,
+				All:             all,
+				OutputFormat:    "terminal",
+				OutputPath:      outputDir,
+				ProviderName:    providerName,
+				VerboseOutput:   verbose,
+				LogPrompts:      logPrompts,
+				LogFullExchange: logFullExchange,
 			}
 			
 			// Create and run workflow
@@ -135,6 +137,7 @@ A tool that uses LLMs to review code changes in Git repositories.
 	rootCmd.PersistentFlags().StringVarP(&providerName, "provider", "p", "", "LLM provider to use (overrides config)")
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "", false, "Enable verbose output")
 	rootCmd.PersistentFlags().BoolVarP(&logPrompts, "log-prompts", "x", false, "Log prompts to prompt.log for debugging")
+	rootCmd.PersistentFlags().BoolVar(&logFullExchange, "log-full-exchange", false, "Log both prompts and raw LLM responses to exchange.log")
 	
 	return rootCmd
 }

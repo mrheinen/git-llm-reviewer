@@ -13,6 +13,7 @@ import (
 	"github.com/niels/git-llm-review/pkg/git"
 	"github.com/niels/git-llm-review/pkg/llm"
 	"github.com/niels/git-llm-review/pkg/llm/anthropic"
+	"github.com/niels/git-llm-review/pkg/llm/exchangelog"
 	"github.com/niels/git-llm-review/pkg/llm/openai"
 	"github.com/niels/git-llm-review/pkg/llm/promptlog"
 	"github.com/niels/git-llm-review/pkg/logging"
@@ -24,13 +25,14 @@ import (
 
 // Options represents the options for the review workflow
 type Options struct {
-	ConfigPath    string
-	All           bool
-	OutputFormat  string
-	OutputPath    string
-	ProviderName  string
-	VerboseOutput bool
-	LogPrompts    bool
+	ConfigPath      string
+	All             bool
+	OutputFormat    string
+	OutputPath      string
+	ProviderName    string
+	VerboseOutput   bool
+	LogPrompts      bool
+	LogFullExchange bool
 }
 
 // Statistics represents review statistics
@@ -105,6 +107,25 @@ func NewReviewWorkflow(options Options) (*ReviewWorkflow, error) {
 		}
 	} else {
 		logging.Debug("Prompt logging is disabled")
+	}
+	
+	// Initialize exchange logger if requested
+	if options.LogFullExchange {
+		logging.Info("Initializing exchange logger")
+		exchangeLogPath := "exchange.log" // Use a default path or add to config
+		logging.InfoWith("Exchange logging enabled", map[string]interface{}{
+			"path": exchangeLogPath,
+		})
+		
+		if err := exchangelog.InitGlobalLogger(true, exchangeLogPath); err != nil {
+			logging.ErrorWith("Failed to initialize exchange logger", map[string]interface{}{
+				"error": err.Error(),
+				"path":  exchangeLogPath,
+			})
+			// Continue without exchange logging, but log the error
+		}
+	} else {
+		logging.Debug("Exchange logging is disabled")
 	}
 
 	// Initialize LLM provider

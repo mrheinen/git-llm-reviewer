@@ -60,12 +60,23 @@ func ReviewFileProcessor(
 			// Continue processing
 		}
 
+		// Get the full file content
+		fileContent, err := repoDetector.GetFileContent(repoRoot, file.Path)
+		if err != nil {
+			logging.WarnWith("Failed to get full file content, proceeding with just the diff", map[string]interface{}{
+				"file":  file.Path,
+				"error": err.Error(),
+			})
+			// Continue with empty file content if we couldn't fetch it
+			fileContent = ""
+		}
+
 		// Generate prompt for code review
-		// Create a proper review request with file diff
+		// Create a proper review request with file diff and content
 		reviewRequest := &llm.ReviewRequest{
 			FilePath:    file.Path,
 			FileDiff:    diff,
-			FileContent: "", // We don't have the full file content here, only the diff
+			FileContent: fileContent,
 			Options: llm.ReviewOptions{
 				Timeout:              30 * time.Second, // Default timeout
 				MaxTokens:            1024,

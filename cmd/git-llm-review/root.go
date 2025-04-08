@@ -482,7 +482,7 @@ A tool that uses LLMs to review code changes in Git repositories.
 	rootCmd.Flags().BoolVarP(&showVersion, "version", "v", false, "Display version information")
 	rootCmd.Flags().BoolVarP(&noColor, "no-color", "", false, "Disable color output")
 	rootCmd.Flags().BoolVarP(&logPrompts, "log-prompts", "x", false, "Log prompts to prompt.log for debugging")
-	rootCmd.Flags().BoolVarP(&logFullExchange, "log-full-exchange", "X", false, "Log both prompts and raw LLM responses to exchange.log")
+	rootCmd.Flags().BoolVar(&logFullExchange, "log-full-exchange", false, "Log both prompts and raw LLM responses to exchange.log")
 
 	return rootCmd
 }

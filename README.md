@@ -102,7 +102,7 @@ git-llm-reviewer --log-prompts
 - `-p, --provider string`: LLM provider to use (overrides config)
 - `--verbose`: Enable verbose output
 - `-x, --log-prompts`: Log prompts to prompt.log for debugging
-- `-X, --log-full-exchange`: Log both prompts and raw LLM responses to exchange.log
+- `--log-full-exchange`: Log both prompts and raw LLM responses to exchange.log
 
 ## Building from Source
 
