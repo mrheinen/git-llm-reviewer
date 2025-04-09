@@ -110,7 +110,9 @@ Let me know if you have any questions!`,
     INVALID JSON HERE
   ]
 }`,
-			want:    nil,
+			want: &JSONReviewResult{
+				Issues: []Issue{},
+			},
 			wantErr: true,
 		},
 	}

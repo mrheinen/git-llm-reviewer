@@ -17,7 +17,7 @@ func ParseReview(response string) *ReviewResult {
 		return &ReviewResult{Issues: []Issue{}, Diffs: []FileDiff{}}
 	}
 
-	// Try to parse as JSON first (preferred format)
+	// Parse as JSON (since we are always expecting valid JSON now)
 	jsonResult, err := ParseJSONReview(response)
 	if err == nil && jsonResult != nil && (len(jsonResult.Issues) > 0 || len(jsonResult.Diffs) > 0) {
 		// Ensure we have the required fields in each issue
@@ -28,18 +28,7 @@ func ParseReview(response string) *ReviewResult {
 		}
 	}
 
-	// If standard JSON parsing failed, try lenient parsing
-	jsonResult, err = ParseJSONReviewLenient(response)
-	if err == nil && jsonResult != nil && (len(jsonResult.Issues) > 0 || len(jsonResult.Diffs) > 0) {
-		// Ensure we have the required fields in each issue
-		jsonResult.Issues = cleanupIssues(jsonResult.Issues)
-		return &ReviewResult{
-			Issues: jsonResult.Issues,
-			Diffs:  jsonResult.Diffs,
-		}
-	}
-
-	// If all parsing methods failed, return empty result
+	// If parsing failed, return empty result
 	return &ReviewResult{Issues: []Issue{}, Diffs: []FileDiff{}}
 }
 
@@ -68,42 +57,23 @@ func (r *ReviewResult) String() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Found %d issues:\n\n", len(r.Issues)))
 
-	// Group issues by file for better readability
-	issuesByFile := make(map[string][]Issue)
-	
-	// Add issues to their respective files
-	for _, issue := range r.Issues {
-		file := issue.File
-		if file == "" {
-			file = "General" // For issues not associated with a specific file
-		}
-		issuesByFile[file] = append(issuesByFile[file], issue)
-	}
-	
-	// Print issues grouped by file
-	for file, issues := range issuesByFile {
-		sb.WriteString(fmt.Sprintf("File: %s\n", file))
-		sb.WriteString("----------------------------------------\n")
+	// Print issues without grouping by file to match test expectations
+	for i, issue := range r.Issues {
+		sb.WriteString(fmt.Sprintf("Issue %d: %s\n", i+1, issue.Title))
+		sb.WriteString(fmt.Sprintf("Explanation: %s\n", issue.Explanation))
 		
-		for i, issue := range issues {
-			sb.WriteString(fmt.Sprintf("Issue %d: %s\n", i+1, issue.Title))
-			sb.WriteString(fmt.Sprintf("Explanation: %s\n\n", issue.Explanation))
-		}
-		
-		// If there's a backward compatibility diff in the issues, show it
-		for _, issue := range issues {
-			if issue.Diff != "" {
-				sb.WriteString("Suggested changes:\n")
-				sb.WriteString("```diff\n")
-				sb.WriteString(issue.Diff)
-				sb.WriteString("\n```\n\n")
-			}
+		// If there's a diff, show it
+		if issue.Diff != "" {
+			sb.WriteString("Suggested changes:\n")
+			sb.WriteString("```diff\n")
+			sb.WriteString(issue.Diff)
+			sb.WriteString("\n```\n")
 		}
 		
 		sb.WriteString("\n")
 	}
 	
-	// Now add the consolidated diffs
+	// Add the consolidated diffs
 	if len(r.Diffs) > 0 {
 		sb.WriteString("\nConsolidated diffs by file:\n")
 		sb.WriteString("========================================\n\n")

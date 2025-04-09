@@ -55,7 +55,6 @@ code changes"
 }
 
 Output raw JSON and do not use markdown code blocks or other wrapping.
-
 Do NOT include any text before or after the JSON. Your entire response must be ONLY valid JSON.`
 
 	case SystemPromptExplain:
